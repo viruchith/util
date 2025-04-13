@@ -52,6 +52,12 @@ mkdir -p "$OUTPUT_DIR"
 INPUT_DIR=$(cd "$INPUT_DIR" && pwd)
 OUTPUT_DIR=$(cd "$OUTPUT_DIR" && pwd)
 
+#input dir size
+input_dir_size=$(du -sh "$INPUT_DIR" | cut -f1)
+
+#start time
+start_time=$(date +%s)
+echo "start time: $start_time"
 echo "Starting media compression from $INPUT_DIR to $OUTPUT_DIR"
 
 # Counter for processed files
@@ -99,6 +105,9 @@ process_directory() {
             mkdir -p "$out_dir"
             
             echo "Processing: $rel_path"
+            echo "Timestamp: $(date)"
+            echo "File size: $(du -h "$file" | cut -f1)"
+            echo "File type: $ext"
             
             # Process based on file type
             case "$ext" in
@@ -115,6 +124,7 @@ process_directory() {
                             ffmpeg -loglevel error -i "$file" -compression_level 6 -q:v 75 "$out_file"
                         fi
                         processed=$((processed+1))
+                        echo "Processed image size: $(du -h "$out_file" | cut -f1)"
                     else
                         echo "Skipping non-image file with image extension: $rel_path"
                         skipped=$((skipped+1))
@@ -128,6 +138,7 @@ process_directory() {
                         echo "Output to: $out_file"
                         ffmpeg -loglevel error -i "$file" -c:v libx265 -preset slow -crf 28 -c:a aac -b:a 128k "$out_file"
                         processed=$((processed+1))
+                        echo "Processed video size: $(du -h "$out_file" | cut -f1)"
                     else
                         echo "Skipping non-video file with video extension: $rel_path"
                         skipped=$((skipped+1))
@@ -172,4 +183,11 @@ cd "$(dirname "$OUTPUT_DIR")"
 zip -r -"$COMPRESSION_LEVEL" "$ZIP_NAME" "$(basename "$OUTPUT_DIR")"
 
 echo "Archive created: $(pwd)/$ZIP_NAME"
+echo "Started at: $(date -d $start_time)"
+echo "Finished at: $(date)"
+echo "Total time taken: $(( $(date +%s) - start_time )) seconds"
+echo "Compression completed: $processed files processed, $skipped files skipped."
+echo "Input directory size: $input_dir_size"
+echo "Output directory size: $(du -sh "$OUTPUT_DIR" | cut -f1)"
+echo "Zip archive size: $(du -sh "$ZIP_NAME" | cut -f1)"
 echo "All done!"
