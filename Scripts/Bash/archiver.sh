@@ -67,7 +67,7 @@ skipped=0
 # Improved file type detection
 is_image_file() {
     local file="$1"
-    file "$file" | grep -qiE "image|bitmap|JPEG|PNG|GIF|TIFF|BMP|WebP"
+    file "$file" | grep -qiE "image|jpg|jpeg|png|gif|bmp|tiff|tif|webp|dng|raw|cr2|nef|arw|orf|sr2|raf|rw2|pef|srw"
 }
 
 is_video_file() {
@@ -110,7 +110,7 @@ process_directory() {
             # Process based on file type
             case "$ext" in
                 # Image formats
-                jpg|jpeg|png|gif|bmp|tiff|tif|webp)
+                jpg|jpeg|png|gif|bmp|tiff|tif|webp|dng|raw|cr2|nef|arw|orf|sr2|raf|rw2|pef|srw)                
                     if is_image_file "$file"; then
                         if [[ "$ext" == "png" ]]; then
                             out_file="$out_dir/$base_without_ext.png"
